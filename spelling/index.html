@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spelling">
+<meta name="theme-color" content="#e8722e">
+<title>Spelling Sounds</title>
+<style>
+  :root{ --bg1:#e8722e; --bg2:#f59e5b; --card:#fff; --ink:#3a2418; --muted:#9a7b68;
+    --good:#19b574; --soft-good:#e6f8ef; --bad:#ef5757; --soft-bad:#fdeee5; --gold:#ffc83d; --blue:#5b9dff; --purple:#9b8cff; --accent:#ff7aa2; --slot:#fbeee3; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;}
+  html,body{margin:0; padding:0; min-height:100%;}
+  body{font-family:"SF Pro Rounded",-apple-system,"Baloo 2",Verdana,sans-serif;
+    background:radial-gradient(120% 120% at 50% 0%,var(--bg2),var(--bg1)); color:var(--ink); overflow-x:hidden; -webkit-user-select:none; user-select:none;}
+  .wrap{max-width:760px; margin:0 auto; padding:14px 14px 40px; padding-top:max(14px,env(safe-area-inset-top));}
+  .screen{display:none; animation:fade .25s ease;} .screen.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  .hud{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+  .chip{background:#fff; border-radius:999px; padding:7px 13px; font-weight:800; font-size:16px; display:flex; align-items:center; gap:6px; box-shadow:0 4px 0 rgba(0,0,0,.12);}
+  .chip.coins{color:#c98a00;} .chip.pack{cursor:pointer;} .grow{flex:1;}
+  .iconbtn{background:rgba(255,255,255,.3); color:#fff; border:none; border-radius:50%; width:42px; height:42px; font-size:19px; box-shadow:0 4px 0 rgba(0,0,0,.15); cursor:pointer;}
+  .iconbtn:active{transform:translateY(2px);}
+  .guide{display:flex; align-items:flex-end; gap:10px; margin:4px 2px 16px;}
+  .guide .face{font-size:50px; animation:bob 2.6s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
+  .bubble{background:#fff; border-radius:18px; padding:11px 14px; font-weight:700; font-size:15px; box-shadow:0 4px 0 rgba(0,0,0,.1); position:relative; max-width:78%;}
+  .bubble:after{content:""; position:absolute; left:-9px; bottom:13px; border:8px solid transparent; border-right-color:#fff;}
+  .btn{border:none; border-radius:16px; font-family:inherit; font-weight:800; cursor:pointer;}
+  .btn-ghost{background:rgba(255,255,255,.3); color:#fff; padding:12px 18px; font-size:16px; box-shadow:0 4px 0 rgba(0,0,0,.15);}
+  .btn-ghost:active{transform:translateY(2px);}
+  .footerbtns{display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;}
+
+  .listcard{background:#fff; border-radius:22px; padding:16px 18px; box-shadow:0 6px 0 rgba(0,0,0,.12); display:flex; align-items:center; gap:14px; margin-bottom:12px; cursor:pointer;}
+  .listcard:active{transform:translateY(2px);}
+  .listcard .lem{font-size:40px;} .listcard .ltitle{font-weight:900; font-size:20px;} .listcard .ldesc{font-size:13px; color:var(--muted); font-weight:700;}
+  .listcard .lgo{font-size:26px; margin-left:auto;}
+
+  .actbar{background:#fff; border-radius:18px; padding:12px 16px; box-shadow:0 5px 0 rgba(0,0,0,.1); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; font-weight:800; color:var(--muted); font-size:14px;}
+  .qcard{background:#fff; border-radius:24px; padding:20px 18px; box-shadow:0 7px 0 rgba(0,0,0,.12); text-align:center;}
+  .instr{font-size:18px; font-weight:800; margin-bottom:10px;}
+  .hearbtn{background:var(--blue); color:#fff; border:none; border-radius:16px; font-weight:900; font-size:20px; padding:15px 26px; font-family:inherit; box-shadow:0 5px 0 #3a78d6; cursor:pointer;}
+  .hearbtn:active{transform:translateY(2px);}
+  .boxes{display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin:18px 0 6px;}
+  .box{min-width:56px; height:64px; border-radius:14px; background:var(--slot); border:3px dashed #e0b48f; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; color:var(--ink); padding:2px; cursor:pointer;}
+  .box.sel{border-color:var(--blue);} .box.filled{border-style:solid; border-color:#c99;} .box.ok{border-color:var(--good); background:var(--soft-good);} .box.no{border-color:var(--bad); background:var(--soft-bad);}
+  .boxline{width:44px; height:4px; background:#e0b48f; border-radius:2px; margin:3px auto 0;}
+  .tray{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:16px; min-height:64px;}
+  .tile{min-width:52px; height:60px; border-radius:14px; background:#fff; border:3px solid var(--purple); box-shadow:0 5px 0 #cabfff; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:900; color:#5a4fd6; cursor:pointer; padding:2px;}
+  .tile.sel{outline:4px solid var(--gold); transform:scale(1.05);} .tile.used{opacity:.25; pointer-events:none;}
+  .revealword{font-size:15px; font-weight:800; color:var(--muted); margin-top:8px; display:none;} .revealword.show{display:block;}
+  .wlink{font-size:13px; font-weight:800; color:var(--muted); text-decoration:underline; cursor:pointer; margin-top:8px; display:inline-block;}
+  .helprow{display:flex; gap:10px; margin-top:14px;}
+  .helpbtn{flex:1; background:var(--gold); color:#5b4a12; border:none; border-radius:14px; font-weight:900; font-size:15px; padding:13px; box-shadow:0 4px 0 #d6a322; font-family:inherit; cursor:pointer;}
+  .helpbtn:active{transform:translateY(2px);}
+  .helpbox{background:#fffaf0; border:2px solid var(--gold); border-radius:14px; padding:12px; margin-top:10px; font-weight:700; font-size:15px; display:none; line-height:1.5;} .helpbox.show{display:block;}
+  .feedback{text-align:center; font-size:18px; font-weight:900; min-height:22px; margin-top:12px;} .feedback.good{color:var(--good);} .feedback.bad{color:var(--bad);}
+  .actbtns{display:flex; gap:10px; margin-top:12px;}
+  .bigbtn{flex:1; border:none; border-radius:16px; font-weight:900; font-size:20px; padding:16px; font-family:inherit; box-shadow:0 5px 0 rgba(0,0,0,.18); cursor:pointer;}
+  .bigbtn.check{background:var(--good); color:#fff; box-shadow:0 5px 0 #0e9b63;} .bigbtn.next{background:var(--blue); color:#fff; box-shadow:0 5px 0 #3a78d6;}
+  .bigbtn:disabled{background:#e3ddd7; color:#b3a99f; box-shadow:0 5px 0 #cbc3ba;} .bigbtn:active:not(:disabled){transform:translateY(2px);}
+
+  .prizerow{display:flex; gap:12px; margin-bottom:8px; flex-wrap:wrap;}
+  .prize{flex:1; min-width:150px; background:#fff; border-radius:22px; padding:16px; text-align:center; box-shadow:0 6px 0 rgba(0,0,0,.12); border:3px solid var(--gold);}
+  .prize.pack{border-color:var(--accent);}
+  .prize .pemoji{font-size:52px;} .prize .pttl{font-weight:900; font-size:17px; margin-top:4px;} .prize .pcost{font-weight:900; color:#c98a00; margin:6px 0;}
+  .prize .pbtn{background:var(--good); color:#fff; border:none; border-radius:14px; font-weight:900; font-size:16px; padding:12px; width:100%; font-family:inherit; box-shadow:0 4px 0 #0e9b63; cursor:pointer;}
+  .prize .pbtn:disabled{background:#e3ddd7; color:#b3a99f; box-shadow:0 4px 0 #cbc3ba;} .prize .pneed{font-size:12px; font-weight:800; color:var(--muted); margin-top:6px;}
+  .overlay{position:fixed; inset:0; background:rgba(60,36,24,.78); display:none; align-items:center; justify-content:center; z-index:50; padding:18px;} .overlay.show{display:flex;}
+  .modal{background:#fff; border-radius:28px; padding:26px 22px; text-align:center; max-width:420px; width:100%; box-shadow:0 14px 0 rgba(0,0,0,.22); animation:pop .4s cubic-bezier(.2,1.4,.5,1);}
+  @keyframes pop{from{transform:scale(.6); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .modal .big{font-size:60px;} .modal h2{margin:6px 0; font-size:23px; color:var(--bg1);} .modal p{font-size:16px; margin:8px 0;}
+  .pill{display:inline-block; background:var(--gold); color:#5b4a12; font-weight:900; padding:9px 16px; border-radius:999px; margin:6px 0; font-size:16px;}
+  .go{background:var(--good); color:#fff; padding:14px 26px; font-size:19px; box-shadow:0 6px 0 #0e9b63; margin-top:8px;}
+  .confetti{position:fixed; top:-12px; width:11px; height:16px; z-index:60;}
+  .panel{background:#fff; border-radius:20px; padding:18px; box-shadow:0 6px 0 rgba(0,0,0,.1); margin-bottom:14px;} .panel h2{margin-top:0;}
+  .mini{font-size:13px; color:var(--muted); line-height:1.55;}
+  .setrow{display:flex; align-items:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
+  input[type=number],input[type=text]{font-family:inherit; font-size:16px; padding:9px; border:2px solid #e3d4c7; border-radius:10px;} input[type=number]{width:90px;}
+  .toggle{background:var(--good); color:#fff; border:none; border-radius:999px; padding:7px 14px; font-weight:800; font-family:inherit; cursor:pointer;} .toggle.off{background:#bbb;}
+  .danger{background:#fdeee5; color:#c0392b; padding:10px 15px; border-radius:12px; font-weight:800; border:none; font-family:inherit; cursor:pointer;}
+  select{font-family:inherit; font-size:15px; padding:8px; border:2px solid #e3d4c7; border-radius:10px;}
+</style>
+</head>
+<body>
+<!-- Loud storage warning: this page cannot save progress. Added 2026-10-10. -->
+<div id="saveWarn" style="display:none;position:sticky;top:0;z-index:9999;background:#b3261e;color:#fff;
+     padding:14px 16px;font:600 16px/1.4 system-ui,-apple-system,sans-serif;text-align:center">
+  <span style="font-size:22px">⚠️</span> <b>This page is NOT saving progress.</b><br>
+  <span style="font-weight:400;font-size:14px">Close this and open the app from the saved
+  bookmark in Chrome instead — otherwise coins and levels disappear.</span>
+</div>
+<div class="wrap">
+
+  <!-- HOME -->
+  <div id="home" class="screen active">
+    <div class="hud">
+      <div class="chip coins">🪙 <span id="coinCount">0</span></div>
+      <div class="chip pack" id="packChip">🎴<span id="cardCount">0</span> 📦<span id="packCount">0</span></div>
+      <div class="grow"></div>
+      <button class="iconbtn" id="soundBtn">🔊</button><button class="iconbtn" id="voiceBtn">🗣️</button>
+    </div>
+    <div class="guide"><div class="face">🦉</div><div class="bubble" id="guideMsgS">Hi! Listen to the word, count the sounds, and spell it. 🌟</div></div>
+    <div id="lists"></div>
+    <div class="footerbtns">
+      <button class="btn btn-ghost" id="shopBtn">🎁 Prize Shop</button>
+      <button class="btn btn-ghost" id="homeSave">💾 Save</button>
+      <button class="btn btn-ghost" id="parentBtn">👨‍👩‍👦 Grown-ups</button>
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div id="practice" class="screen">
+    <div class="actbar"><button class="btn btn-ghost" id="pracBack" style="padding:8px 12px;">← Home</button><span id="actTitle"></span><span id="actCount"></span></div>
+    <div class="qcard">
+      <div class="instr" id="instr">Listen, then spell the word</div>
+      <button class="hearbtn" id="hearBtn">🔊 Hear the word</button>
+      <div class="boxes" id="boxes"></div>
+      <div class="tray" id="tray"></div>
+      <span class="wlink" id="wLink">see the word</span>
+      <div class="revealword" id="wReveal"></div>
+      <div class="helprow"><button class="helpbtn" id="hintBtn">💡 Help me</button><button class="helpbtn" id="ruleBtn">📏 The rule</button></div>
+      <div class="helpbox" id="helpBox"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="actbtns"><button class="bigbtn check" id="checkBtn">Check my spelling</button><button class="bigbtn next" id="nextBtn" style="display:none;">Next →</button></div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="shop" class="screen">
+    <div class="hud"><button class="btn btn-ghost" id="shopBack" style="padding:10px 14px;">← Back</button><div class="chip coins">🪙 <span id="coinCountS">0</span></div><div class="grow"></div><div class="chip">🎴 <span id="cardCountS">0</span></div><div class="chip">📦 <span id="packCountS">0</span></div></div>
+    <div class="guide"><div class="face">🦉</div><div class="bubble">Spend your coins! Save up for a real Pokémon card or pack. 🎁</div></div>
+    <div class="prizerow">
+      <div class="prize"><div class="pemoji">🎴</div><div class="pttl">Pokémon Card</div><div class="pcost">🪙 <span id="cardPriceTxt">150</span></div><button class="pbtn" id="buyCard">Buy</button><div class="pneed" id="cardNeed"></div></div>
+      <div class="prize pack"><div class="pemoji">📦</div><div class="pttl">Pokémon Pack</div><div class="pcost">🪙 <span id="packPriceTxt">500</span></div><button class="pbtn" id="buyPack">Buy</button><div class="pneed" id="packNeed"></div></div>
+    </div>
+  </div>
+
+  <!-- PARENT -->
+  <div id="parent" class="screen">
+    <div class="hud"><button class="btn btn-ghost" id="parentBack" style="padding:10px 14px;">← Back</button><div class="grow"></div></div>
+    <div id="parentGate" class="panel"><h2>Quick check 🔒</h2><p class="mini">Answer to continue.</p>
+      <p style="font-size:24px; font-weight:900;" id="gateQ"></p><input type="number" id="gateInput" inputmode="numeric">
+      <button class="toggle" id="gateGo" style="background:var(--gold); color:#5b4a12;">Enter</button>
+      <div id="gateMsg" style="color:var(--bad); font-weight:800; margin-top:8px;"></div></div>
+    <div id="parentBody" style="display:none;">
+      <div class="panel"><h2>Progress</h2><div id="progWrap" class="mini"></div></div>
+      <div class="panel"><h2>Save &amp; back up progress</h2>
+        <p class="mini"><b>Best:</b> open this file in <b>Chrome</b> and bookmark it (progress saves by itself; make sure Chrome isn't set to clear site data on close). Save a progress file after big sessions to be safe.</p>
+        <div class="setrow"><button class="toggle" id="saveFile" style="background:var(--good);">💾 Save to a file</button><button class="toggle" id="loadFile" style="background:var(--blue);">📂 Load from a file</button><input type="file" id="fileIn" accept="application/json,.json" style="display:none;"></div>
+        <div id="fileMsg" class="mini" style="font-weight:800;"></div></div>
+      <div class="panel"><h2>Prize prices</h2>
+        <div class="setrow">Coins for a <b>card</b> 🎴 <input type="number" id="cardPriceInput" min="10" max="2000" step="10"></div>
+        <div class="setrow">Coins for a <b>pack</b> 📦 <input type="number" id="packPriceInput" min="10" max="5000" step="10"></div>
+        <button class="toggle" id="savePrices" style="background:var(--gold); color:#5b4a12;">Save prices</button>
+        <button class="danger" id="resetRewards" style="margin-top:10px; background:#fff3e0; color:#b26a00;">Mark prizes given (reset 🎴/📦)</button></div>
+      <div class="panel"><h2>Player's name</h2>
+        <p class="mini">First name only. Used in greetings and story questions. A change here stays in this browser.</p>
+        <div class="setrow">Name: <input type="text" id="pnInput" maxlength="20" autocomplete="off" style="flex:1; min-width:120px; font:inherit; padding:8px 10px; border-radius:10px; border:2px solid #cfd8d5;"> <button class="toggle" id="pnSave" style="background:var(--blue);">Save</button></div></div>
+      <div class="panel"><h2>Sound &amp; voice</h2>
+        <div class="setrow">Sound <button class="toggle" id="tgSound">On</button></div>
+        <div class="setrow">Read aloud <button class="toggle" id="tgVoice">On</button></div>
+        <div class="setrow">Voice <select id="voiceSel" style="flex:1; min-width:150px;"></select> <button class="toggle" id="voiceTest" style="background:var(--blue);">▶︎</button></div></div>
+      <div class="panel"><h2>Reset</h2><button class="danger" id="resetAll">Reset everything</button>
+        <details style="margin-top:12px;"><summary class="mini" style="cursor:pointer;">About</summary>
+          <p class="mini">Word lists and the method follow the school's spelling program. Method: hear the word, one box per sound, put the matching letters in each box, read it back. Lists: ck, tch, and -ed words. Self-paced, read-aloud, hints and the spelling rules built in.</p></details></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="doneOverlay"><div class="modal"><div class="big">🌟</div><h2 id="doneTitle">Great spelling!</h2><div class="pill" id="doneCoins"></div><p class="mini" id="doneShop"></p><button class="btn go" id="doneAgain">Keep going</button><button class="btn btn-ghost" id="doneHome" style="margin-top:8px; color:var(--bg1); background:#fbeee3; box-shadow:0 4px 0 #e8d3c2;">Home</button></div></div>
+<div class="overlay" id="rewardOverlay"><div class="modal"><div class="big" id="rewardEmoji">🎴</div><h2 id="rewardTitle"></h2><p id="rewardMsg"></p><div class="pill" id="rewardPill"></div><button class="btn go" id="rewardClose">YESSS!</button></div></div>
+
+<script>
+"use strict";
+/* ---- sound ---- */
+const Sound=(()=>{ let ctx=null; function ac(){ if(!ctx){try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(ctx&&ctx.state==="suspended"){try{ctx.resume();}catch(e){}} return ctx;}
+  function tone(f,s,d,t="sine",v=0.2){ const c=ac(); if(!c||!state.sound)return; const o=c.createOscillator(),g=c.createGain(); o.type=t;o.frequency.value=f;o.connect(g);g.connect(c.destination);
+    const tt=c.currentTime+s; g.gain.setValueAtTime(0,tt); g.gain.linearRampToValueAtTime(v,tt+0.02); g.gain.exponentialRampToValueAtTime(0.0001,tt+d); o.start(tt); o.stop(tt+d+0.02);}
+  return{ wake(){ac();}, tap(){tone(520,0,0.05,"sine",0.08);}, pick(){tone(700,0,0.05,"square",0.08);}, correct(){tone(660,0,0.12,"triangle",0.22);tone(990,0.09,0.14,"triangle",0.2);},
+    soft(){tone(330,0,0.18,"sine",0.12);}, coin(){tone(880,0,0.07,"square",0.13);tone(1320,0.06,0.09,"square",0.1);},
+    win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,i*0.1,0.22,"triangle",0.22));}, pack(){[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,i*0.12,0.25,"triangle",0.25));} };
+})();
+/* ---- voices (prefer a man's voice) ---- */
+let VOICES=[]; function loadVoices(){ try{VOICES=(speechSynthesis.getVoices()||[]);}catch(e){} }
+if(typeof speechSynthesis!=="undefined"){ loadVoices(); try{ speechSynthesis.onvoiceschanged=()=>{ loadVoices(); try{ if(typeof populateVoices==="function"&&document.getElementById("parentBody")&&document.getElementById("parentBody").style.display!=="none")populateVoices(); }catch(e){} }; }catch(e){} }
+const MALE_RE=/daniel|aaron|fred|gordon|\blee\b|rishi|oliver|\btom\b|\balex\b|arthur|nathan|david|\bmark\b|\bguy\b|george|ryan|james|reed|eddy|rocko|\bmale\b/i;
+const FEM_RE=/female|woman|girl|karen|samantha|victoria|tessa|moira|fiona|serena|catherine|\bzoe\b|allison|\bava\b|susan|zira|hazel|linda|nicky|sandy|shelley/i;
+function isMale(v){ const n=v.name||""; return !FEM_RE.test(n)&&MALE_RE.test(n); }
+function pickVoice(){ if(!VOICES.length)loadVoices(); if(state.voiceName){const ex=VOICES.find(v=>v.name===state.voiceName); if(ex)return ex;}
+  const en=VOICES.filter(v=>/^en/i.test(v.lang)); const pool=en.length?en:VOICES;
+  return pool.find(v=>/en[-_]?AU/i.test(v.lang)&&isMale(v))||pool.find(v=>isMale(v))||pool.find(v=>/en[-_]?AU/i.test(v.lang))||pool[0]||null; }
+function speak(t,rate){ if(!state.narrate||!t)return; try{ speechSynthesis.cancel();
+  setTimeout(()=>{ try{ const u=new SpeechSynthesisUtterance(t); const v=pickVoice(); if(v)u.voice=v; u.lang=(v&&v.lang)||"en-AU"; u.rate=rate||0.9; u.pitch=1.0; speechSynthesis.speak(u); speechSynthesis.resume(); }catch(e){} },60);
+}catch(e){} }
+
+/* ---- word lists (from school; grapheme = one box per sound) ---- */
+const LISTS={
+  ck:{name:"ck words",emoji:"🦆",rule:"‘ck’ comes after a short vowel sound when there is no other consonant.",
+    words:[["yuck",["y","u","ck"]],["deck",["d","e","ck"]],["truck",["t","r","u","ck"]],["black",["b","l","a","ck"]],["stick",["s","t","i","ck"]],["bucket",["b","u","ck","e","t"]],["padlock",["p","a","d","l","o","ck"]],["packet",["p","a","ck","e","t"]],["chicken",["ch","i","ck","e","n"]],["rocket",["r","o","ck","e","t"]]],
+    distract:["k","c","cc"]},
+  tch:{name:"tch words",emoji:"🥎",rule:"‘tch’ comes after a short vowel sound.",
+    words:[["fetch",["f","e","tch"]],["match",["m","a","tch"]],["hutch",["h","u","tch"]],["latch",["l","a","tch"]],["catch",["c","a","tch"]],["pitch",["p","i","tch"]],["snatch",["s","n","a","tch"]],["stitch",["s","t","i","tch"]],["stretch",["s","t","r","e","tch"]],["kitchen",["k","i","tch","e","n"]]],
+    distract:["ch","t","sh"]},
+  ed:{name:"-ed words",emoji:"⏪",rule:"Think of the base word first, then add ‘ed’.",
+    words:[["landed",["l","a","n","d","ed"]],["hunted",["h","u","n","t","ed"]],["crashed",["c","r","a","sh","ed"]],["drifted",["d","r","i","f","t","ed"]],["blended",["b","l","e","n","d","ed"]],["matched",["m","a","tch","ed"]],["stitched",["s","t","i","tch","ed"]],["snatched",["s","n","a","tch","ed"]],["rolled",["r","o","ll","ed"]]],
+    distract:["d","t","id"]}
+};
+
+/* ---- state ---- */
+/* Player's first name: a default below, changeable per browser in Grown-ups. No surname anywhere in this file. */
+const PN_KEY="player_name";
+const PN_DEFAULT="Noah";   /* first name only is fine to publish; never a surname */
+function pname(){ try{ return (localStorage.getItem(PN_KEY)||"").replace(/[^\p{L}\p{M} '\-]/gu,"").trim().slice(0,20)||PN_DEFAULT; }catch(e){ return PN_DEFAULT; } }
+const PN=pname();
+const KEY=["no","ahSpelling_v1"].join("");   /* storage key kept exactly as it was, so saved progress carries over */
+function defaultState(){ return {coins:0, cardsEarned:0, packsEarned:0, cardPrice:300, packPrice:1000, sound:true, narrate:true, voiceName:"", done:{}, stats:{}, pr2:true}; }
+let state=load();
+function load(){ if(!saveWorks()){ SAVE_OK=false; try{document.addEventListener("DOMContentLoaded",saveWarnShow);}catch(e){} saveWarnShow(); }
+   try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.coins!==undefined){ const st=Object.assign(defaultState(),s);
+    if(!s.pr2){ st.cardPrice=300; st.packPrice=1000; st.pr2=true; } // one-time: double prize prices
+    return st; } }catch(e){} return defaultState(); }
+let SAVE_OK=null;
+function saveWarnShow(){ try{const b=document.getElementById("saveWarn"); if(b) b.style.display="block"; }catch(e){} }
+function saveWorks(){
+  // Prove the browser really persists a write — not just that setItem didn't throw.
+  try{
+    const probe="__saveprobe__"+KEY;
+    localStorage.setItem(probe,"1");
+    const ok=localStorage.getItem(probe)==="1";
+    localStorage.removeItem(probe);
+    return ok;
+  }catch(e){ return false; }
+}
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(state));
+    if(localStorage.getItem(KEY)===null) throw new Error("write discarded");
+    if(SAVE_OK!==true) SAVE_OK=true;
+  }catch(e){
+    SAVE_OK=false;
+    saveWarnShow();
+  }
+}
+const R=(a,b)=>a+Math.floor((b-a+1)*Math.random());
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function $(id){return document.getElementById(id);}
+
+function syncHUD(){ ["coinCount","coinCountS"].forEach(i=>{const e=$(i);if(e)e.textContent=state.coins;});
+  ["cardCount","cardCountS"].forEach(i=>{const e=$(i);if(e)e.textContent=state.cardsEarned;});
+  ["packCount","packCountS"].forEach(i=>{const e=$(i);if(e)e.textContent=state.packsEarned;}); }
+
+/* ---- home ---- */
+function renderHome(){ syncHUD(); const w=$("lists"); w.innerHTML="";
+  Object.keys(LISTS).forEach(k=>{ const L=LISTS[k]; const st=state.stats[k]||{correct:0,wrong:0}; const att=st.correct+st.wrong; const acc=att?Math.round(st.correct/att*100):null;
+    const c=document.createElement("div"); c.className="listcard";
+    c.innerHTML=`<div class="lem">${L.emoji}</div><div><div class="ltitle">${L.name}</div><div class="ldesc">${L.words.length} words${acc!==null?" · "+acc+"% correct":""}</div></div><div class="lgo">▶️</div>`;
+    c.onclick=()=>{Sound.tap(); startList(k);}; w.appendChild(c); });
+  $("soundBtn").textContent=state.sound?"🔊":"🔇"; $("voiceBtn").textContent=state.narrate?"🗣️":"🔕"; }
+
+/* ---- practice ---- */
+let A=null;
+function startList(k){ const L=LISTS[k]; A={key:k,L,order:shuffle([...Array(L.words.length).keys()]),idx:0,total:Math.min(6,L.words.length),done:0};
+  $("actTitle").textContent=L.emoji+" "+L.name; show("practice"); nextWord(); }
+function nextWord(){ const L=A.L; if(A.idx>=A.order.length)A.idx=0; const wi=A.order[A.idx++];
+  A.word=L.words[wi][0]; A.graph=L.words[wi][1]; A.fills=new Array(A.graph.length).fill(null); A.attempts=0; A.solved=false; A.sel=null; A.hintLvl=0;
+  $("actCount").textContent=(A.done+1)+" / "+A.total;
+  $("instr").textContent="Listen, then spell the word";
+  $("helpBox").classList.remove("show"); $("helpBox").innerHTML=""; const fb=$("feedback"); fb.textContent=""; fb.className="feedback";
+  $("wReveal").textContent=A.word; $("wReveal").classList.remove("show"); $("wLink").style.display="inline-block";
+  $("checkBtn").style.display="block"; $("checkBtn").disabled=true; $("nextBtn").style.display="none";
+  renderBoxes(); renderTray(); setTimeout(()=>speak(A.word),250); }
+function renderBoxes(){ const b=$("boxes"); b.innerHTML=""; A.graph.forEach((g,i)=>{ const d=document.createElement("div");
+  const filled=A.fills[i]; d.className="box"+(filled?" filled":""); d.innerHTML=(filled||"")+`<div class="boxline"></div>`;
+  d.onclick=()=>{ if(A.solved)return; if(A.fills[i]){ A.fills[i]=null; Sound.pick(); renderBoxes(); renderTray(); updateCheck(); return; }
+    if(A.sel!==null){ A.fills[i]=A.sel; A.sel=null; Sound.pick(); renderBoxes(); renderTray(); updateCheck(); } };
+  b.appendChild(d); }); }
+function renderTray(){ const t=$("tray"); t.innerHTML="";
+  if(!A.tiles){ A.tiles=shuffle([...A.graph, ...shuffle([...A.L.distract]).slice(0,2)]); }
+  const usedCount={}; A.fills.forEach(f=>{ if(f)usedCount[f]=(usedCount[f]||0)+1; });
+  const shown={}; A.tiles.forEach((g,i)=>{ const need=A.tiles.filter(x=>x===g).length; shown[g]=(shown[g]||0);
+    const placedOfThis=usedCount[g]||0; const tileUsed = shown[g] < placedOfThis; shown[g]++;
+    const el=document.createElement("div"); el.className="tile"+(tileUsed?" used":"")+(A.sel===g&&!tileUsed&&shown[g]===placedOfThis+1?"":"");
+    el.textContent=g; el.onclick=()=>{ if(A.solved||tileUsed)return; A.sel=(A.sel===g?null:g); Sound.tap(); renderTray(); markSel(); };
+    t.appendChild(el); }); markSel(); }
+function markSel(){ [...document.querySelectorAll(".tile")].forEach(el=>{ el.classList.toggle("sel", A.sel!==null && el.textContent===A.sel && !el.classList.contains("used")); }); }
+function updateCheck(){ $("checkBtn").disabled=A.fills.some(f=>f===null); }
+function checkSpelling(){ let ok=true; A.fills.forEach((f,i)=>{ if(f!==A.graph[i])ok=false; });
+  if(ok){ [...$("boxes").children].forEach(c=>c.classList.add("ok")); markCorrect(); }
+  else { A.attempts++; Sound.soft();
+    [...$("boxes").children].forEach((c,i)=>{ if(A.fills[i]!==A.graph[i])c.classList.add("no"); });
+    if(A.attempts>=2){ A.solved=true; recordStat(false); revealWord();
+      const fb=$("feedback"); fb.className="feedback bad"; fb.textContent="Here it is — "+A.word+". Great try! 🧠"; speak("The word is spelled like this. "+A.word);
+      $("checkBtn").style.display="none"; showNext(); }
+    else { const fb=$("feedback"); fb.className="feedback bad"; fb.textContent="Not quite — check the red boxes. 🙂"; speak("Not quite. Look at the red boxes and try again.");
+      setTimeout(()=>{ A.fills=A.fills.map((f,i)=>f===A.graph[i]?f:null); A.sel=null; renderBoxes(); renderTray(); updateCheck(); },900); } }
+}
+function revealWord(){ A.fills=[...A.graph]; renderBoxes(); [...$("boxes").children].forEach(c=>{c.classList.remove("no");c.classList.add("ok");}); $("wReveal").classList.add("show"); }
+function markCorrect(){ A.solved=true; Sound.correct(); state.coins+=4; A.done++; recordStat(true);
+  const fb=$("feedback"); fb.className="feedback good"; fb.textContent=pick(["Yes! 🌟","Spelled it! 🎉","Well done! 💪","Perfect! ✨"]);
+  speak("Great! Now read it back. "+A.word); save(); $("checkBtn").style.display="none"; showNext(); }
+function showNext(){ const nb=$("nextBtn"); nb.style.display="block";
+  if(A.done>=A.total){ nb.textContent="Finish 🎉"; nb.onclick=()=>finishList(); } else { nb.textContent="Next word →"; nb.onclick=()=>nextWord(); } A.tiles=null; }
+function recordStat(ok){ const t=(state.stats[A.key]=state.stats[A.key]||{correct:0,wrong:0}); if(ok)t.correct++; else t.wrong++; save(); }
+function finishList(){ state.done[A.key]=(state.done[A.key]||0)+1; const earned=A.total*4+10; state.coins+=10; save(); syncHUD(); Sound.win(); confetti();
+  $("doneTitle").textContent=A.L.name+" done! 🎉"; $("doneCoins").textContent="🪙 +"+earned+" coins (you have "+state.coins+")";
+  const toCard=Math.max(0,state.cardPrice-state.coins);
+  $("doneShop").textContent=state.coins>=state.cardPrice?"You can buy a Pokémon card! 🎴 Tap 🎁 Shop.":toCard+" more coins for a card 🎴";
+  $("doneOverlay").classList.add("show"); speak("Great spelling! You earned "+earned+" coins."); }
+
+/* ---- shop ---- */
+function renderShop(){ syncHUD(); $("cardPriceTxt").textContent=state.cardPrice; $("packPriceTxt").textContent=state.packPrice;
+  const cB=$("buyCard"),pB=$("buyPack"); cB.disabled=state.coins<state.cardPrice; pB.disabled=state.coins<state.packPrice;
+  $("cardNeed").textContent=state.coins>=state.cardPrice?"You can buy one! 🎉":(state.cardPrice-state.coins)+" more coins";
+  $("packNeed").textContent=state.coins>=state.packPrice?"You can buy one! 🎉":(state.packPrice-state.coins)+" more coins";
+  cB.onclick=()=>buyPrize("card"); pB.onclick=()=>buyPrize("pack"); }
+function buyPrize(kind){ const isPack=kind==="pack",price=isPack?state.packPrice:state.cardPrice; if(state.coins<price)return;
+  state.coins-=price; if(isPack)state.packsEarned++; else state.cardsEarned++; save(); renderShop();
+  $("rewardEmoji").textContent=isPack?"📦":"🎴"; $("rewardTitle").textContent=isPack?"POKÉMON PACK!":"POKÉMON CARD!";
+  $("rewardMsg").innerHTML=`You spent your coins on a real ${isPack?"pack":"card"}! 🎉`; $("rewardPill").textContent="Show Mum or Dad to collect it! 🎉";
+  Sound.pack(); confetti(); $("rewardOverlay").classList.add("show"); speak(isPack?"Pokemon pack! Show mum or dad.":"Pokemon card! Show mum or dad."); }
+function confetti(){ const cols=["#ffc83d","#ff7aa2","#19b574","#5b9dff","#9b8cff","#e8722e"];
+  for(let i=0;i<44;i++){const c=document.createElement("div"); c.className="confetti"; c.style.left=(Math.random()*100)+"vw"; c.style.background=cols[i%cols.length];
+    const dur=1.8+Math.random()*1.3,del=Math.random()*0.3; c.style.transition=`top ${dur}s ease-in ${del}s, opacity ${dur}s ${del}s, transform ${dur}s linear ${del}s`;
+    document.body.appendChild(c); requestAnimationFrame(()=>{c.style.top="105vh";c.style.opacity="0";c.style.transform="rotate("+(720*(Math.random()>.5?1:-1))+"deg)";}); setTimeout(()=>c.remove(),(dur+del)*1000+200);} }
+
+/* ---- parent ---- */
+let gateAns=0;
+function openParent(){ show("parent"); $("parentBody").style.display="none"; $("parentGate").style.display="block"; $("gateMsg").textContent=""; $("gateInput").value=""; const a=R(3,9),b=R(3,9); gateAns=a*b; $("gateQ").textContent=`${a} × ${b} = ?`; }
+function renderParent(){ $("cardPriceInput").value=state.cardPrice; $("packPriceInput").value=state.packPrice;
+  $("tgSound").textContent=state.sound?"On":"Off"; $("tgSound").classList.toggle("off",!state.sound);
+  $("tgVoice").textContent=state.narrate?"On":"Off"; $("tgVoice").classList.toggle("off",!state.narrate);
+  populateVoices();
+  let h=`🪙 ${state.coins} coins · 🎴 ${state.cardsEarned} · 📦 ${state.packsEarned} waiting to collect<br><br>`;
+  Object.keys(LISTS).forEach(k=>{ const st=state.stats[k]||{correct:0,wrong:0}; const att=st.correct+st.wrong; const acc=att?Math.round(st.correct/att*100):null;
+    h+=`<b>${LISTS[k].name}:</b> ${acc===null?"not tried yet":acc+"% correct ("+att+" words)"}<br>`; });
+  $("progWrap").innerHTML=h; }
+function populateVoices(){ const sel=$("voiceSel"); if(!sel)return; loadVoices(); const en=VOICES.filter(v=>/^en/i.test(v.lang)); const list=en.length?en:VOICES;
+  let html='<option value="">Auto (man\'s voice)</option>'; list.forEach(v=>{ html+=`<option value="${v.name.replace(/"/g,'&quot;')}"${state.voiceName===v.name?" selected":""}>${v.name} (${v.lang})${isMale(v)?" ♂":""}</option>`; }); sel.innerHTML=html; }
+
+/* ---- nav ---- */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
+$("shopBtn").onclick=()=>{Sound.tap(); renderShop(); show("shop");};
+$("packChip").onclick=()=>{renderShop(); show("shop");};
+$("shopBack").onclick=()=>{renderHome(); show("home");};
+$("parentBtn").onclick=()=>openParent();
+$("parentBack").onclick=()=>{renderHome(); show("home");};
+$("pracBack").onclick=()=>{try{speechSynthesis.cancel();}catch(e){} renderHome(); show("home");};
+$("soundBtn").onclick=()=>{state.sound=!state.sound; save(); $("soundBtn").textContent=state.sound?"🔊":"🔇";};
+$("voiceBtn").onclick=()=>{state.narrate=!state.narrate; save(); $("voiceBtn").textContent=state.narrate?"🗣️":"🔕";};
+$("hearBtn").onclick=()=>{ const was=state.narrate; state.narrate=true; speak(A.word); state.narrate=was; };
+$("wLink").onclick=()=>$("wReveal").classList.toggle("show");
+$("hintBtn").onclick=()=>{ A.hintLvl=Math.min(A.hintLvl+1,3); const tips=[`Count the sounds in "${A.word}". There are ${A.graph.length}.`,`Say it slowly. The first sound is "${A.graph[0]}".`,A.L.rule]; $("helpBox").innerHTML="💡 "+tips.slice(0,A.hintLvl).join("<br>💡 "); $("helpBox").classList.add("show"); speak(tips[A.hintLvl-1]); };
+$("ruleBtn").onclick=()=>{ $("helpBox").innerHTML="📏 "+A.L.rule; $("helpBox").classList.add("show"); speak(A.L.rule); };
+$("checkBtn").onclick=()=>checkSpelling();
+$("doneAgain").onclick=()=>{$("doneOverlay").classList.remove("show"); startList(A.key);};
+$("doneHome").onclick=()=>{$("doneOverlay").classList.remove("show"); renderHome(); show("home");};
+$("rewardClose").onclick=()=>{$("rewardOverlay").classList.remove("show"); renderShop(); show("shop");};
+$("gateGo").onclick=()=>{ if(parseInt($("gateInput").value,10)===gateAns){ $("parentGate").style.display="none"; $("parentBody").style.display="block"; renderParent(); } else { $("gateMsg").textContent="Not quite — try again."; const a=R(3,9),b=R(3,9); gateAns=a*b; $("gateQ").textContent=`${a} × ${b} = ?`; $("gateInput").value=""; } };
+$("savePrices").onclick=()=>{ let c=parseInt($("cardPriceInput").value,10),p=parseInt($("packPriceInput").value,10); state.cardPrice=Math.max(10,Math.min(2000,isNaN(c)?150:c)); state.packPrice=Math.max(10,Math.min(5000,isNaN(p)?500:p)); save(); renderParent(); $("savePrices").textContent="Saved ✓"; setTimeout(()=>$("savePrices").textContent="Save prices",1200); };
+$("resetRewards").onclick=()=>{ if(confirm("Reset cards & packs waiting to collect to 0?")){ state.cardsEarned=0; state.packsEarned=0; save(); renderParent(); syncHUD(); } };
+$("tgSound").onclick=()=>{state.sound=!state.sound; save(); renderParent();};
+$("tgVoice").onclick=()=>{state.narrate=!state.narrate; save(); renderParent();};
+$("voiceSel").onchange=()=>{ state.voiceName=$("voiceSel").value; save(); };
+$("voiceTest").onclick=()=>{ const was=state.narrate; state.narrate=true; speak("Hello"+(pname()?" "+pname():"")+". Let's spell some words."); state.narrate=was; };
+function downloadProgress(name){
+  try{
+    const d=new Date(), stamp=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const blob=new Blob([JSON.stringify(state)],{type:"application/json"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a");
+    a.href=url; a.download=name+"-"+stamp+".json"; document.body.appendChild(a); a.click();
+    setTimeout(()=>{document.body.removeChild(a); URL.revokeObjectURL(url);},500);
+    return true;
+  }catch(e){ return false; }
+}
+$("saveFile").onclick=()=>{ $("fileMsg").textContent=downloadProgress("spelling-progress")
+  ?"Saved a progress file ✓ Reload it with 📂 anytime.":"Couldn't save here — try another browser."; };
+$("homeSave").onclick=()=>{ $("guideMsgS").textContent=downloadProgress("spelling-progress")
+  ?"Saved! 💾 Your progress is safe in a file. 🌟":"Hmm, that didn't save. Ask a grown-up to help. 🙂"; };
+$("loadFile").onclick=()=>$("fileIn").click();
+$("fileIn").onchange=(e)=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ const s=JSON.parse(r.result); if(!s||s.coins===undefined)throw 0; state=Object.assign(defaultState(),s); save(); renderParent(); syncHUD(); $("fileMsg").textContent="Progress loaded ✓"; }catch(err){ $("fileMsg").textContent="That file doesn't look right."; } }; r.readAsText(f); e.target.value=""; };
+$("resetAll").onclick=()=>{ if(confirm("Reset everything?")){ state=defaultState(); save(); renderParent(); renderHome(); syncHUD(); } };
+renderHome();
+
+/* ---- audio keep-alive: Chrome suspends the AudioContext and can wedge speechSynthesis ---- */
+(function(){
+  function wake(){ try{ Sound.wake(); }catch(e){}
+    try{ if(speechSynthesis.paused) speechSynthesis.resume(); }catch(e){} }
+  ["pointerdown","touchstart","keydown","click"].forEach(ev=>document.addEventListener(ev,wake,{passive:true,capture:true}));
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) wake(); });
+  setInterval(()=>{ try{ if(speechSynthesis.paused) speechSynthesis.resume(); }catch(e){} },4000);
+})();
+
+/* Player's name: greet by name if one is set on this device; Grown-ups can set or clear it. */
+(function(){ const n=pname(), g=document.getElementById("guideMsgS"); if(n&&g) g.textContent=g.textContent.replace(/^Hi!/,"Hi "+n+"!");
+  const i=document.getElementById("pnInput"), b=document.getElementById("pnSave"); if(!i||!b)return; i.value=n;
+  b.onclick=()=>{ try{ const v=i.value.replace(/[^\p{L}\p{M} '\-]/gu,"").trim().slice(0,20); if(v)localStorage.setItem(PN_KEY,v); else localStorage.removeItem(PN_KEY); }catch(e){} location.reload(); }; })();
+</script>
+</body>
+</html>
